@@ -1,36 +1,27 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Email Previewer
 
-## Getting Started
+![screenshot](/public/screenshot.png)
 
-First, run the development server:
+This is a NextJS project (with TypeScript and TailwindCSS) which is an email template editor using [react.email](https://react.email) to render UI primitives as well as the output processed HTML code.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## The Gist
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. The idea was to implement an industry standard editor that can be easily extended as needed and provide a familiar feel - hence the choice of [Monaco Editor](https://microsoft.github.io/monaco-editor/).
+2. The UI is very simple, but allows for resizing the panes vertically, as it has a horizontal splitter.
+3. The rendering pipeline uses the [render()](https://react.email/docs/utilities/render) method of [react.email](https://react.email) to generate a unified, inlined source than can be then displayed in the right pane.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## EmailEditor
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- The editor uses a typical instance of [Monaco Editor](https://microsoft.github.io/monaco-editor/) with a sample code loaded into the buffer.
+- Linting errors are supressed for the purpose of the app, as they are not deemed essential for the user experience.
+- The code changes are reflected live in the preview pipeline.
 
-## Learn More
+## EmailPreview
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- This component runs a side-effect hook that kick starts the rendering pipeline once the `code` prop changes.
+- The pipeline consists of a few steps:
+  1. First, the code is transpiled from TSX to JavaScript source code text using [sucrase](https://sucrase.io/).
+  2. Then, the code is executed, defined as a component and exported. The `new Function()` essentially wraps the export into an anonymous function scope with required params (i.e. `React`).
+  3. Finally, the [render()](https://react.email/docs/utilities/render) method uses the generated `<EmailComponent>` to render the HTML which is then displayed in an `<iframe>`.
+  4. There is a simple error support; in case of transpilation errors a message will be displayed in the right pane.
+  5. **Important**: Because all the dependencies are defined within the preview pipeline (i.e. `@react-email/components`, user is able to use only the libraries provided in the sample code visible by default).

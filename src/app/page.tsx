@@ -1,65 +1,77 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import { EmailEditor } from "@/components/email-editor";
+import { EmailPreview } from "@/components/email-preview";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import { MailIcon } from "@/components/ui/mail";
+
+const DEFAULT_CODE = `import { Button, Html, Head, Preview, Body, Container, Section, Text, Tailwind } from "@react-email/components";
+import * as React from "react";
+
+/**
+ * This implementation uses Tailwind CSS for styling and TSX for markup.
+ * Feel free to edit this code to see changes live.
+ */
+export default function Email() {
+  return (
+    <Html>
+      <Head />
+      <Preview>Preview text for your email</Preview>
+      <Tailwind>
+        <Body className="bg-white my-auto mx-auto font-sans">
+          <Container className="border border-solid border-[#eaeaea] rounded my-[40px] mx-auto p-[20px] max-w-[465px]">
+            <Section className="mt-[32px]">
+              <Text className="text-[24px] font-normal text-center p-0 my-[30px] mx-0">
+                Welcome to <strong>Email Previewer</strong>
+              </Text>
+              <Text className="text-[14px] leading-[24px] text-black">
+                Hello there,
+              </Text>
+              <Text className="text-[14px] leading-[24px] text-black">
+                This is a live preview of your email template built using \`react.email\`. You can edit the code on the left and see the changes here instantly.
+              </Text>
+              <Section className="text-center mt-[32px] mb-[32px]">
+                <Button
+                  className="bg-[#000000] rounded text-white text-[12px] font-semibold no-underline text-center px-5 py-3"
+                  href="https://react.email"
+                >
+                  Explore react.email
+                </Button>
+              </Section>
+            </Section>
+          </Container>
+        </Body>
+      </Tailwind>
+    </Html>
+  );
+}
+`;
 
 export default function Home() {
+  const [code, setCode] = useState(DEFAULT_CODE);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="h-screen w-screen overflow-hidden bg-background text-foreground flex flex-col">
+      <header className="h-12 border-b flex items-center px-4 shrink-0 bg-[#1e1e1e] border-[#333]">
+        <div className="flex items-center gap-2">
+          <MailIcon className="w-4 h-4 text-gray-400" />
+          <h1 className="font-medium text-sm text-gray-400">Email Previewer</h1>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </header>
+      <ResizablePanelGroup orientation="horizontal" className="flex-1">
+        <ResizablePanel defaultSize={50} minSize={20} className="bg-[#1e1e1e]">
+          <EmailEditor value={code} onChange={(val) => setCode(val || "")} />
+        </ResizablePanel>
+        <ResizableHandle className="bg-[#333] hover:bg-[#444] transition-colors w-[1px]" />
+        <ResizablePanel defaultSize={50} minSize={20}>
+          <EmailPreview code={code} />
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 }

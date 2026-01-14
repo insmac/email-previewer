@@ -18,10 +18,11 @@ This is a NextJS project (with TypeScript and TailwindCSS) which is an email tem
 
 ## EmailPreview
 
+- The Preview supports both `HTML` and `Plain Text` mode, toggled via tabs.
 - This component runs a side-effect hook that kick starts the rendering pipeline once the `code` prop changes.
 - The pipeline consists of a few steps:
   1. First, the code is transpiled from TSX to JavaScript source code text using [sucrase](https://sucrase.io/).
   2. Then, the code is executed, defined as a component and exported. The `new Function()` essentially wraps the export into an anonymous function scope with required params (i.e. `React`).
-  3. Finally, the [render()](https://react.email/docs/utilities/render) method uses the generated `<EmailComponent>` to render the HTML which is then displayed in an `<iframe>`.
+  3. Finally, the [render()](https://react.email/docs/utilities/render) method uses the generated `<EmailComponent>` to render the HTML which is then displayed in an `<iframe>`. For plain text, `toPlainText()` is used.
   4. There is a simple error support; in case of transpilation errors a message will be displayed in the right pane.
   5. **Important**: Because all the dependencies are defined within the preview pipeline (i.e. `@react-email/components`, user is able to use only the libraries provided in the sample code visible by default).

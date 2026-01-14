@@ -1,9 +1,16 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { render } from "@react-email/render";
+import { render, toPlainText } from "@react-email/render";
 import * as ReactEmailComponents from "@react-email/components";
 import { transform } from "sucrase";
+
+type PreviewMode = "html" | "plaintext";
+
+const PREVIEW_TABS: { mode: PreviewMode; label: string }[] = [
+  { mode: "html", label: "HTML" },
+  { mode: "plaintext", label: "Plain Text" },
+];
 
 interface EmailPreviewProps {
   code: string;
@@ -11,13 +18,16 @@ interface EmailPreviewProps {
 
 export function EmailPreview({ code }: EmailPreviewProps) {
   const [html, setHtml] = useState<string>("");
+  const [plainText, setPlainText] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [mode, setMode] = useState<PreviewMode>("html");
 
   useEffect(() => {
-    const generateHtml = async () => {
+    const generatePreview = async () => {
       try {
         if (!code.trim()) {
           setHtml("");
+          setPlainText("");
           return;
         }
 
@@ -54,8 +64,10 @@ export function EmailPreview({ code }: EmailPreviewProps) {
         const renderedHtml = await render(<EmailComponent />, {
           pretty: true,
         });
+        const renderedPlainText = toPlainText(renderedHtml);
 
         setHtml(renderedHtml);
+        setPlainText(renderedPlainText);
         setError(null);
       } catch (err: unknown) {
         console.error("Preview Error:", err);
@@ -64,7 +76,7 @@ export function EmailPreview({ code }: EmailPreviewProps) {
     };
 
     // Debounce execution to avoid too many renders
-    const timer = setTimeout(generateHtml, 800);
+    const timer = setTimeout(generatePreview, 800);
     return () => clearTimeout(timer);
   }, [code]);
 
@@ -80,13 +92,37 @@ export function EmailPreview({ code }: EmailPreviewProps) {
   }
 
   return (
-    <div className="h-full w-full bg-white relative">
-      <iframe
-        srcDoc={html}
-        className="w-full h-full border-0 absolute inset-0"
-        title="Email Preview"
-        sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-      />
+    <div className="h-full w-full flex flex-col">
+      <div className="flex border-b border-[#333] bg-[#1e1e1e] shrink-0">
+        {PREVIEW_TABS.map((tab) => (
+          <button
+            key={tab.mode}
+            onClick={() => setMode(tab.mode)}
+            className={`px-4 py-2 text-sm font-medium transition-colors ${
+              mode === tab.mode
+                ? "text-white bg-[#2d2d2d] border-b-2 border-blue-500"
+                : "text-gray-400 hover:text-white hover:bg-[#2a2a2a]"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex-1 relative">
+        {mode === "html" ? (
+          <iframe
+            srcDoc={html}
+            className="w-full h-full border-0 absolute inset-0 bg-white"
+            title="Email Preview"
+            sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+          />
+        ) : (
+          <pre className="w-full h-full overflow-auto p-4 bg-[#1e1e1e] text-gray-200 font-mono text-sm whitespace-pre-wrap">
+            {plainText}
+          </pre>
+        )}
+      </div>
     </div>
   );
 }
